@@ -21,12 +21,13 @@ export class UserService {
 
   async loginUser(payload: LoginDto) {
     const { email, password } = payload;
-    const { idToken, refreshToken, expiresIn } = await this.signInWithEmailAndPassword(email, password);
+    const { idToken, refreshToken, expiresIn } =
+      await this.signInWithEmailAndPassword(email, password);
     return { idToken, refreshToken, expiresIn };
   }
 
   private async signInWithEmailAndPassword(email: string, password: string) {
-    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.APIKEY}`;
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAB1xvB4s0DiUThbnVtOYKCJEuy8zSjTxI`;
     return await this.sendPostRequest(url, {
       email,
       password,
@@ -41,7 +42,7 @@ export class UserService {
       });
       return response.data;
     } catch (error) {
-      console.log('error', error);
+      console.log('error', error.message);
     }
   }
 }
