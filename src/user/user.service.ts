@@ -3,9 +3,12 @@ import { RegisterUserDto } from './dto/register-user.dto';
 import * as firebaseAdmin from 'firebase-admin';
 import { LoginDto } from './dto/login.dto';
 import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
+  constructor(private configService: ConfigService) {}
+
   async registerUser(registerUser: RegisterUserDto) {
     try {
       const userRecord = await firebaseAdmin.auth().createUser({
@@ -27,7 +30,8 @@ export class UserService {
   }
 
   private async signInWithEmailAndPassword(email: string, password: string) {
-    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAB1xvB4s0DiUThbnVtOYKCJEuy8zSjTxI`;
+    const apiKey = this.configService.get<string>('APIKEY');
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
     return await this.sendPostRequest(url, {
       email,
       password,
