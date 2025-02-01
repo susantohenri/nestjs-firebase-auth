@@ -1,0 +1,46 @@
+name: Deploy
+on:
+    push:
+        branches:
+          - main    
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Copy dist contents via SCP
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "dist/*, package*"
+          strip_components: 1
+          target: firebase-auth
+
+      - name: Restart PM2
+        uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+        with:
+          host: ${{ secrets.HOST }}
+          user: ${{ secrets.USERNAME }}
+          pass: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          first_ssh: |
+            cd firebase-auth
+            npm install --omit=dev
+            pm2 restart firebase-auth || pm2 start main.js --name "firebase-auth"
